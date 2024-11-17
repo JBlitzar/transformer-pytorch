@@ -22,8 +22,11 @@ def encode_inputs(sentence, model, src_data, beam_size, device):
 
 
 def update_targets(targets, best_indices, idx, vocab_size):
-    best_tensor_indices = torch.div(best_indices, vocab_size)
+    #best_tensor_indices = torch.div(best_indices, vocab_size)
+    best_tensor_indices = (best_indices // vocab_size).to(torch.int64)
+
     best_token_indices = torch.fmod(best_indices, vocab_size)
+    #print(best_tensor_indices)
     new_batch = torch.index_select(targets, 0, best_tensor_indices)
     new_batch[:, idx] = best_token_indices
     return new_batch
@@ -61,7 +64,7 @@ def main():
     trg_data = torch.load(args.data_dir + '/target.pt')
 
     # Load a saved model.
-    device = torch.device('cpu' if args.no_cuda else 'cuda')
+    device = "mps" if torch.backends.mps.is_available() else "cpu"
     model = utils.load_checkpoint(args.model_dir, device)
 
     pads = torch.tensor([trg_data['pad_idx']] * beam_size, device=device)
@@ -77,6 +80,7 @@ def main():
 
     if args.translate:
         sentence = input('Source? ')
+    
 
     # Encoding inputs.
     if args.translate:
@@ -88,6 +92,8 @@ def main():
     else:
         enc_output, src_mask = None, None
         sentence = input('Target? ').split()
+        og_sentence = " ".join(sentence.copy())
+
         for idx, _ in enumerate(sentence):
             sentence[idx] = trg_data['field'].vocab.stoi[sentence[idx]]
         sentence.append(trg_data['pad_idx'])
@@ -128,7 +134,7 @@ def main():
             targets = update_targets(targets, best_indices, idx, vocab_size)
 
     result = get_result_sentence(indices_history, trg_data, vocab_size)
-    print("Result: {}".format(result))
+    print(f"Result: [{og_sentence}] {result}")
 
     print("Elapsed Time: {:.2f} sec".format(time.time() - start_time))
 

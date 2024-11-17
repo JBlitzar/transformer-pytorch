@@ -1,0 +1,1 @@
+python decoder.py --data_dir data --model_dir output/last/models
