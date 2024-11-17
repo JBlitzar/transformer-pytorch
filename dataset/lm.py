@@ -126,11 +126,11 @@ def prepare(max_length, batch_size, device, opt, data_dir):
 
     if load_preprocessed:
         print("Loading preprocessed data...")
-        trg_field = torch.load(data_dir + '/target.pt')['field']
+        trg_field = torch.load(data_dir + '/target.pt', weights_only=True)['field']
 
         data_paths = glob.glob(data_dir + '/examples-train-*.pt')
         examples_train = torch.load(data_paths[0])
-        examples_val = torch.load(data_dir + '/examples-val-0.pt')
+        examples_val = torch.load(data_dir + '/examples-val-0.pt', weights_only=True)
 
         fields = [('trg', trg_field)]
         train = LM1b(examples_train, fields, filter_pred=filter_pred)

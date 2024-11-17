@@ -10,6 +10,9 @@ from dataset import problem
 from utils.optimizer import LRScheduler
 from utils import utils
 
+os.system(f"caffeinate -is -w {os.getpid()} &")
+
+
 
 def summarize_train(writer, global_step, last_time, model, opt,
                     inputs, targets, optimizer, loss, pred, ans):
@@ -132,12 +135,11 @@ def main():
     parser.add_argument('--model', type=str, default='transformer')
     parser.add_argument('--output_dir', type=str, default='./output')
     parser.add_argument('--data_dir', type=str, default='./data')
-    parser.add_argument('--no_cuda', action='store_true')
     parser.add_argument('--parallel', action='store_true')
     parser.add_argument('--summary_grad', action='store_true')
     opt = parser.parse_args()
 
-    device = torch.device('cpu' if opt.no_cuda else 'cuda')
+    device = "mps" if torch.backends.mps.is_available() else "cpu"
 
     if not os.path.exists(opt.output_dir + '/last/models'):
         os.makedirs(opt.output_dir + '/last/models')
@@ -154,9 +156,9 @@ def main():
     if opt.model == 'transformer':
         from model.transformer import Transformer
         model_fn = Transformer
-    elif opt.model == 'fast_transformer':
-        from model.fast_transformer import FastTransformer
-        model_fn = FastTransformer
+    # elif opt.model == 'fast_transformer':
+    #     from model.fast_transformer import FastTransformer
+    #     model_fn = FastTransformer
 
     if os.path.exists(opt.output_dir + '/last/models/last_model.pt'):
         print("Load a checkpoint...")
@@ -176,9 +178,9 @@ def main():
         model = model.to(device=device)
         global_step = 0
 
-    if opt.parallel:
-        print("Use", torch.cuda.device_count(), "GPUs")
-        model = torch.nn.DataParallel(model)
+    # if opt.parallel:
+    #     print("Use", torch.cuda.device_count(), "GPUs")
+    #     model = torch.nn.DataParallel(model)
 
     num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print("# of parameters: {}".format(num_params))
