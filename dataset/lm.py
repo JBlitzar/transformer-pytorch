@@ -1,4 +1,4 @@
-from collections import Counter, OrderedDict
+from collections import Counter, OrderedDict, defaultdict
 import glob
 import io
 import os
@@ -7,14 +7,20 @@ import pickle
 import torch
 from torchtext import data
 from tqdm import tqdm
+import torchtext
+
 
 from dataset import common
+
+
 
 # pylint: disable=arguments-differ
 
 
 def split_tokenizer(x):
     return x.split()
+
+torch.serialization.add_safe_globals([data.Field, split_tokenizer, torchtext.vocab.Vocab, defaultdict,torchtext.vocab._default_unk_index,torchtext.data.example.Example])
 
 
 def read_examples(paths, fields, data_dir, mode, filter_pred, num_shard):
@@ -129,7 +135,7 @@ def prepare(max_length, batch_size, device, opt, data_dir):
         trg_field = torch.load(data_dir + '/target.pt', weights_only=True)['field']
 
         data_paths = glob.glob(data_dir + '/examples-train-*.pt')
-        examples_train = torch.load(data_paths[0])
+        examples_train = torch.load(data_paths[0], weights_only=True)
         examples_val = torch.load(data_dir + '/examples-val-0.pt', weights_only=True)
 
         fields = [('trg', trg_field)]
