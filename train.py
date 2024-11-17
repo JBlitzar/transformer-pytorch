@@ -59,7 +59,7 @@ def train(train_data, model, opt, global_step, optimizer, t_vocab_size,
           label_smoothing, writer):
     model.train()
     last_time = time.time()
-    pbar = tqdm(total=len(train_data.dataset), ascii=True)
+    pbar = tqdm(total=len(train_data.dataset), ascii=True, dynamic_ncols=True)
     for batch in train_data:
         inputs = None
         if opt.has_inputs:
