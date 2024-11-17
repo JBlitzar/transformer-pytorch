@@ -3,7 +3,7 @@ import os
 import time
 
 import torch
-from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from dataset import problem
