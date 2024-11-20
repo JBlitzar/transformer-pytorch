@@ -1,1 +1,1 @@
-python decoder.py --data_dir data --model_dir output/last/models
+python decoder.py --data_dir data/lm1b --model_dir output/lm1b_100/models
